@@ -5115,10 +5115,10 @@ bool ImGui::IsItemHovered(ImGuiHoveredFlags flags)
         // but once unlocked on a given item we also moving.
         //if (g.HoverDelayTimer >= delay && (g.HoverDelayTimer - g.IO.DeltaTime < delay || g.MouseStationaryTimer - g.IO.DeltaTime < g.Style.HoverStationaryDelay)) { IMGUI_DEBUG_LOG("HoverDelayTimer = %f/%f, MouseStationaryTimer = %f\n", g.HoverDelayTimer, delay, g.MouseStationaryTimer); }
         if ((flags & ImGuiHoveredFlags_Stationary) != 0 && g.HoverItemUnlockedStationaryId != hover_delay_id)
-            return false;
+            { ImWantFrameWithDelay(delay); return false; } // SS_PATCH_IMGUI
 
         if (g.HoverItemDelayTimer < delay)
-            return false;
+            { ImWantFrameWithDelay(delay - g.HoverItemDelayTimer); return false; } // SS_PATCH_IMGUI
     }
 
     return true;
@@ -11388,8 +11388,9 @@ void ImGui::UpdateInputEvents(bool trickle_fast_inputs)
 
     // Record trail (for domain-specific applications wanting to access a precise trail)
     //if (event_n != 0) IMGUI_DEBUG_LOG_IO("Processed: %d / Remaining: %d\n", event_n, g.InputEventsQueue.Size - event_n);
-    for (int n = 0; n < event_n; n++)
-        g.InputEventsTrail.push_back(g.InputEventsQueue[n]);
+     
+    //for (int n = 0; n < event_n; n++) // SS_PATCH_IMGUI
+    //    g.InputEventsTrail.push_back(g.InputEventsQueue[n]);
 
     // [DEBUG]
 #ifndef IMGUI_DISABLE_DEBUG_TOOLS
